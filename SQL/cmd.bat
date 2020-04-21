@@ -1,0 +1,1 @@
+cloud_sql_proxy -instances=flow-263607:asia-east1:flow=tcp:3306
