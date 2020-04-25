@@ -155,7 +155,7 @@ app.get('/getIMServerList', function(req, res) {
 app.listen(3000);
 
 // socket
-var server = require('http').createServer();
+var server = require('https').createServer();
 var io = require('socket.io')(server);
 var serverChatDic = new Map(); // 服务端
 var clientChatDic = new Map(); // 客户端
