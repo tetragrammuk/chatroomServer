@@ -202,7 +202,7 @@ io.on('connection', function(socket) {
             console.log('server get')
             // 1.通知服务端
             if (serverChatDic.has(serverChatId)) {
-                console.log('eventName='+eventName+'__'+'clientChatEn='+clientChatEn+'msg='data.msg)
+                console.log('eventName='+eventName+'__'+'clientChatEn='+clientChatEn+'msg='+data.msg)
                 serverChatDic.get(serverChatId).socket.emit(eventName, {
                     clientChatEn: clientChatEn,
                     msg: data.msg
