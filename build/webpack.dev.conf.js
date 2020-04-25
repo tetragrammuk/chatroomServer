@@ -202,7 +202,7 @@ io.on('connection', function(socket) {
             console.log('server get')
             // 1.通知服务端
             if (serverChatDic.has(serverChatId)) {
-                console.log(serverChatDic)
+                console.log('eventName='+eventName+'__'+'clientChatEn='+clientChatEn+'msg='data.msg)
                 serverChatDic.get(serverChatId).socket.emit(eventName, {
                     clientChatEn: clientChatEn,
                     msg: data.msg
@@ -223,15 +223,16 @@ io.on('connection', function(socket) {
                     clientChatEn: clientChatEn,
                     socket: socket
                 });
+                console.log('client_on & clientchatDic =' + clientChatDic)
                 serverChatDic.has(serverChatId) &&
                     socket.emit('SERVER_CONNECTED', {
                         serverChatEn: serverChatDic.get(serverChatId).serverChatEn
                     });
                 // 在客戶連線時載入 歷史訊息
-                serverChatDic.has(serverChatId) &&
-                    socket.emit('SERVER_HISTORY_MSG', {
-                        // msgList: 從 資料庫拿取 歷史對話
-                    });
+                // serverChatDic.has(serverChatId) &&
+                //     socket.emit('SERVER_HISTORY_MSG', {
+                //         // msgList: 從 資料庫拿取 歷史對話
+                //     });
 
             } else if (eventName === 'CLIENT_OFF') {
                 // 2)'CLIENT_OFF'，删除连接
