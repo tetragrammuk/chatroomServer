@@ -4,7 +4,7 @@ const webpack = require('webpack');
 const config = require('../config');
 const merge = require('webpack-merge');
 const path = require('path');
-const fs = require('fs')
+const fs= require('fs') 
 const baseWebpackConfig = require('./webpack.base.conf');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -101,7 +101,7 @@ Your application is running here:
 const app = require('express')();
 const fileUpload = require('express-fileupload');
 app.use(fileUpload()); // for parsing multipart/form-data
-app.use(function (req, res, next) {
+app.use(function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'X-Requested-With');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma');
@@ -113,7 +113,7 @@ app.use(function (req, res, next) {
     }
 });
 // 上传文件
-app.post('/upload', function (req, res) {
+app.post('/upload', function(req, res) {
     if (!req.files) {
         return res.status(400).send('No files were uploaded.');
     }
@@ -121,7 +121,7 @@ app.post('/upload', function (req, res) {
     // <input type="file" name="uploadFile" />
     let file = req.files.uploadFile;
     let encodeFileName = Number.parseInt(Date.now() + Math.random()) + file.name;
-    file.mv(path.resolve(__dirname, '../static/upload/') + '/' + encodeFileName, function (err) {
+    file.mv(path.resolve(__dirname, '../static/upload/') + '/' + encodeFileName, function(err) {
         if (err) {
             return res.status(500).send({
                 code: err.code,
@@ -141,11 +141,11 @@ app.post('/upload', function (req, res) {
 });
 
 // 获取文件
-app.get('/static/upload/:fileName', function (req, res) {
+app.get('/static/upload/:fileName', function(req, res) {
     res.sendFile(path.resolve(__dirname, '../static/upload') + '/' + req.params.fileName);
 });
 // 获取im客服列表
-app.get('/getIMServerList', function (req, res) {
+app.get('/getIMServerList', function(req, res) {
     res.json({
         code: 0,
         data: Array.from(serverChatDic.values()).map((item) => {
@@ -159,8 +159,8 @@ app.listen(3000);
 const privateKey = fs.readFileSync('/home/bob41777/tempp/sslforfree/private.key', 'utf8')
 const certificate = fs.readFileSync('/home/bob41777/tempp/sslforfree/certificate.crt', 'utf8')
 const credentials = {
-    key: privateKey,
-    cert: certificate,
+    key: privateKey, 
+    cert: certificate, 
     passphrase: process.env.PASSPHRASE
 }
 
@@ -169,40 +169,32 @@ var server = require('https').createServer(credentials);
 var io = require('socket.io')(server);
 var serverChatDic = new Map(); // 服务端
 var clientChatDic = new Map(); // 客户端
-var serverSocketList = [];
-io.on('connection', function (socket) {
+// var serverSocketList = [];
+io.on('connection', function(socket) {
     // 服务端上线
-    socket.on('SERVER_ON', function (data) {
+    socket.on('SERVER_ON', function(data) {
         let serverChatEn = data.serverChatEn;
         console.log(`有新的服务端socket连接了，服务端Id：${serverChatEn.serverChatId}`);
         serverChatDic.set(serverChatEn.serverChatId, {
             serverChatEn: serverChatEn,
-            socket: serverSocketList.push(socket)
+            socket: socket
         });
         console.log(`現有的serverChatDic：${serverChatDic}`);
-        console.log(serverChatEn.serverChatId + ' Count : ' + serverSocketList.length);
     });
 
     // 服务端下线
-    socket.on('SERVER_OFF', function (data) {
+    socket.on('SERVER_OFF', function(data) {
         let serverChatEn = data.serverChatEn;
-        let index = serverSocketList.indexOf(serverChatDic.get(serverChatEn.serverChatId).socket);
-        serverSocketList.splice(index, 1);
-        if (serverSocketList.length == 0) {
-            serverChatDic.delete(serverChatEn.serverChatId);
-            console.log('delete Host: serverChatEn.serverChatId')
-        }
-        console.log(serverChatEn.serverChatId + ' Count : ' + serverSocketList.length);
-
+        serverChatDic.delete(serverChatEn.serverChatId);
     });
 
     // 服务端发送了信息
-    socket.on('SERVER_SEND_MSG', function (data) {
+    socket.on('SERVER_SEND_MSG', function(data) {
         if (clientChatDic.has(data.clientChatId)) {
             clientChatDic.get(data.clientChatId).socket.emit('SERVER_SEND_MSG', { msg: data.msg });
         }
     });
-
+    
     // 客户端事件；'CLIENT_ON'(上线), 'CLIENT_OFF'(离线), 'CLIENT_SEND_MSG'(发送消息)
     ['CLIENT_ON', 'CLIENT_OFF', 'CLIENT_SEND_MSG'].forEach((eventName) => {
         socket.on(eventName, (data) => {
@@ -211,17 +203,11 @@ io.on('connection', function (socket) {
             console.log('server get')
             // 1.通知服务端
             if (serverChatDic.has(serverChatId)) {
-                console.log('eventName=' + eventName + '__' + 'clientChatEn=' + clientChatEn + 'msg=' + data.msg)
-                serverChatDic.get(serverChatId).socket.forEach((socketUnit) => {
-                    socketUnit.emit(eventName, {
-                        clientChatEn: clientChatEn,
-                        msg: data.msg
-                    });
-                })
-                // serverChatDic.get(serverChatId).socket.emit(eventName, {
-                //     clientChatEn: clientChatEn,
-                //     msg: data.msg
-                // });
+                console.log('eventName='+eventName+'__'+'clientChatEn='+clientChatEn+'msg='+data.msg)
+                serverChatDic.get(serverChatId).socket.emit(eventName, {
+                    clientChatEn: clientChatEn,
+                    msg: data.msg
+                });
             } else {
                 socket.emit('SERVER_SEND_MSG', {
                     msg: {
