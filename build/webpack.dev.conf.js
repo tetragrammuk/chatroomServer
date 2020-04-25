@@ -173,26 +173,28 @@ var serverSocketList = [];
 io.on('connection', function (socket) {
     // 服务端上线
     socket.on('SERVER_ON', function (data) {
+        serverSocketList.push(socket);
         let serverChatEn = data.serverChatEn;
         console.log(`有新的服务端socket连接了，服务端Id：${serverChatEn.serverChatId}`);
         serverChatDic.set(serverChatEn.serverChatId, {
             serverChatEn: serverChatEn,
-            socket: serverSocketList.push(socket)
+            socket: serverSocketList
         });
         console.log(`現有的serverChatDic：${serverChatDic}`);
-        console.log(serverChatEn.serverChatId + ' Count : ' + serverSocketList.length);
+        console.log(serverChatEn.serverChatId + ' Count : ' + serverChatDic.get(serverChatEn.serverChatId).socket.length);
     });
 
     // 服务端下线
     socket.on('SERVER_OFF', function (data) {
         let serverChatEn = data.serverChatEn;
-        let index = serverSocketList.indexOf(serverChatDic.get(serverChatEn.serverChatId).socket);
-        serverSocketList.splice(index, 1);
-        if (serverSocketList.length == 0) {
-            serverChatDic.delete(serverChatEn.serverChatId);
+        let serverChatId = serverChatEn.serverChatId;        
+        let index = serverChatDic.get(serverChatId).socket.indexOf(serverChatDic.get(serverChatId).socket);
+        serverChatDic.get(serverChatId).socket.splice(index, 1);
+        if (serverChatDic.get(serverChatId).socket.length == 0) {
+            serverChatDic.delete(serverChatId);
             console.log('delete Host: serverChatEn.serverChatId')
         }
-        console.log(serverChatEn.serverChatId + ' Count : ' + serverSocketList.length);
+        console.log(serverChatId + ' Count : ' + serverChatDic.get(serverChatId).socket.length);
 
     });
 
