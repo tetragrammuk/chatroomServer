@@ -190,11 +190,11 @@ io.on('connection', function (socket) {
         let serverChatId = serverChatEn.serverChatId;        
         let index = serverChatDic.get(serverChatId).socket.indexOf(serverChatDic.get(serverChatId).socket);
         serverChatDic.get(serverChatId).socket.splice(index, 1);
+        console.log(serverChatId + ' Count : ' + serverChatDic.get(serverChatId).socket.length);
         if (serverChatDic.get(serverChatId).socket.length == 0) {
             serverChatDic.delete(serverChatId);
             console.log('delete Host: serverChatEn.serverChatId')
         }
-        console.log(serverChatId + ' Count : ' + serverChatDic.get(serverChatId).socket.length);
 
     });
 
