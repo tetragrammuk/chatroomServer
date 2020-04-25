@@ -155,7 +155,16 @@ app.get('/getIMServerList', function(req, res) {
 app.listen(3000);
 
 // socket
-var server = require('https').createServer();
+const privateKey = fs.readFileSync('/home/bob41777/tempp/sslforfree/private.key', 'utf8')
+const certificate = fs.readFileSync('/home/bob41777/tempp/sslforfree/certificate.crt', 'utf8')
+const credentials = {
+    key: privateKey, 
+    cert: certificate, 
+    passphrase: process.env.PASSPHRASE
+}
+
+var server = require('https').createServer(credentials, app);
+// var server = require('https').createServer();
 var io = require('socket.io')(server);
 var serverChatDic = new Map(); // 服务端
 var clientChatDic = new Map(); // 客户端
