@@ -203,21 +203,23 @@ io.on('connection', function (socket) {
         if (clientChatDic.has(data.clientChatId)) {
             clientChatDic.get(data.clientChatId).socket.emit('SERVER_SEND_MSG', { msg: data.msg });
         }
-        // serverChatDic.get(data.serverChatId).socket.forEach((socketUnit) => {
-        //     socketUnit.emit(eventName, {
-        //         clientChatEn: clientChatEn,
-        //         msg: data.msg
-        //     });
-        // })
+        serverChatDic.get(data.serverChatId).socket.forEach((socketUnit) => {
+            if (socketUnit != socket) {
+                socketUnit.emit('SERVER_SEND_MSG', {
+                    clientChatEn: clientChatEn,
+                    msg: data.msg
+                });
+            }
+        })
     });
 
     socket.on('disconnect', function () {
-        console.log('disconnect:socket id =' + socket.id);
+        // console.log('disconnect:socket id =' + socket.id);
         clientChatDic.forEach(mapcallback);
         function mapcallback(value, key, map) {
-            console.log("this is vaule.id=" + value.socket.id);
-            console.log("this is key=" + key);
-            console.log("this is mpa=" + map);
+            // console.log("this is vaule.id=" + value.socket.id);
+            // console.log("this is key=" + key);
+            // console.log("this is mpa=" + map);
 
             if (value.socket.id == socket.id) {  // 找到對應socketid
                 clientChatDic.delete(key); // key = clientid
