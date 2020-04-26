@@ -202,15 +202,16 @@ io.on('connection', function (socket) {
     socket.on('SERVER_SEND_MSG', function (data) {
         if (clientChatDic.has(data.clientChatId)) {
             clientChatDic.get(data.clientChatId).socket.emit('SERVER_SEND_MSG', { msg: data.msg });
+            serverChatDic.get(data.serverChatId).socket.forEach((socketUnit) => {
+                if (socketUnit != socket) {
+                    socketUnit.emit('SERVER_SEND_MSG', {
+                        clientChatEn: clientChatDic.get(data.clientChatId).clientChatEn,
+                        msg: data.msg
+                    });
+                }
+            })
+
         }
-        serverChatDic.get(data.serverChatId).socket.forEach((socketUnit) => {
-            if (socketUnit != socket) {
-                socketUnit.emit('SERVER_SEND_MSG', {
-                    clientChatEn: clientChatDic.get(data.clientChatId).clientChatEn,
-                    msg: data.msg
-                });
-            }
-        })
     });
 
     socket.on('disconnect', function () {
