@@ -187,7 +187,7 @@ io.on('connection', function (socket) {
     // 服务端下线
     socket.on('SERVER_OFF', function (data) {
         let serverChatEn = data.serverChatEn;
-        let serverChatId = serverChatEn.serverChatId;        
+        let serverChatId = serverChatEn.serverChatId;
         let index = serverChatDic.get(serverChatId).socket.indexOf(serverChatDic.get(serverChatId).socket);
         serverChatDic.get(serverChatId).socket.splice(index, 1);
         console.log(serverChatId + ' Count : ' + serverChatDic.get(serverChatId).socket.length);
@@ -203,8 +203,32 @@ io.on('connection', function (socket) {
         if (clientChatDic.has(data.clientChatId)) {
             clientChatDic.get(data.clientChatId).socket.emit('SERVER_SEND_MSG', { msg: data.msg });
         }
+        // serverChatDic.get(data.serverChatId).socket.forEach((socketUnit) => {
+        //     socketUnit.emit(eventName, {
+        //         clientChatEn: clientChatEn,
+        //         msg: data.msg
+        //     });
+        // })
     });
 
+    socket.on('disconnect', function () {
+        console.log('disconnect:socket id =' + socket.id);
+        clientChatDic.forEach(mapcallback);
+        function mapcallback(value, key, map) {
+            console.log("this is vaule.id" = value.id);
+            console.log("this is key" = key);
+            console.log("this is mpa" = map);
+
+
+            if (value.id == socket.id) {  // 找到對應socketid
+                clientChatDic.delete(key); // key = clientid
+                //對 server 端的socket傳送 client off
+                serverChatDic.get('ieat').socket.emit('CLIENT_OFF', {
+                    clientChatEn: map.clientChatEn
+                });
+            }
+        }
+    });
     // 客户端事件；'CLIENT_ON'(上线), 'CLIENT_OFF'(离线), 'CLIENT_SEND_MSG'(发送消息)
     ['CLIENT_ON', 'CLIENT_OFF', 'CLIENT_SEND_MSG'].forEach((eventName) => {
         socket.on(eventName, (data) => {
