@@ -215,9 +215,9 @@ io.on('connection', function (socket) {
         console.log('disconnect:socket id =' + socket.id);
         clientChatDic.forEach(mapcallback);
         function mapcallback(value, key, map) {
-            console.log("this is vaule.id" = value.id);
-            console.log("this is key" = key);
-            console.log("this is mpa" = map);
+            console.log("this is vaule.id = " + value.id);
+            console.log("this is key = " + key);
+            console.log("this is mpa = " + map);
 
 
             if (value.id == socket.id) {  // 找到對應socketid
