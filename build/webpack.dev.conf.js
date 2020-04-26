@@ -222,9 +222,11 @@ io.on('connection', function (socket) {
             if (value.socket.id == socket.id) {  // 找到對應socketid
                 clientChatDic.delete(key); // key = clientid
                 //對 server 端的socket傳送 client off
-                serverChatDic.get('ieat').socket.emit('CLIENT_OFF', {
-                    clientChatEn: value.clientChatEn
-                });
+                serverChatDic.get('ieat').socket.forEach((socketUnit) => {
+                    socketUnit.emit('CLIENT_OFF', {
+                        clientChatEn: value.clientChatEn
+                    });
+                })
             }
         }
     });
