@@ -215,16 +215,15 @@ io.on('connection', function (socket) {
         console.log('disconnect:socket id =' + socket.id);
         clientChatDic.forEach(mapcallback);
         function mapcallback(value, key, map) {
-            console.log("this is vaule = " + value);
-            console.log("this is key = " + key);
-            console.log("this is mpa = " + map);
+            console.log("this is vaule.id=" + value.socket.id);
+            console.log("this is key=" + key);
+            console.log("this is mpa=" + map);
 
-
-            if (value.id == socket.id) {  // 找到對應socketid
+            if (value.socket.id == socket.id) {  // 找到對應socketid
                 clientChatDic.delete(key); // key = clientid
                 //對 server 端的socket傳送 client off
                 serverChatDic.get('ieat').socket.emit('CLIENT_OFF', {
-                    clientChatEn: map.clientChatEn
+                    clientChatEn: value.clientChatEn
                 });
             }
         }
