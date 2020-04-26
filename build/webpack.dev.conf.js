@@ -206,7 +206,7 @@ io.on('connection', function (socket) {
         serverChatDic.get(data.serverChatId).socket.forEach((socketUnit) => {
             if (socketUnit != socket) {
                 socketUnit.emit('SERVER_SEND_MSG', {
-                    clientChatEn: clientChatEn,
+                    clientChatEn: clientChatDic.get(data.clientChatId).clientChatEn,
                     msg: data.msg
                 });
             }
