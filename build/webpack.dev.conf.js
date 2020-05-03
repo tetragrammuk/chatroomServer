@@ -24,7 +24,7 @@ const createPool = async () => {
         // If connecting via unix domain socket, specify the path
         //socketPath: `/cloudsql/flow-263607:asia-east1:flow`,
         // If connecting via TCP, enter the IP and port instead
-        host: '34.80.112.57',
+        host: 'localhost',
         port: 3306,
 
         //...
