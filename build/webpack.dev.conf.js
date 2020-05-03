@@ -22,9 +22,9 @@ const createPool = async () => {
         password: 'fatsheepgod', // e.g. 'my-db-password'
         database: 'chatroomTest', // e.g. 'my-database'
         // If connecting via unix domain socket, specify the path
-        socketPath: `/cloudsql/flow-263607:asia-east1:flow`,
+        //socketPath: `/cloudsql/flow-263607:asia-east1:flow`,
         // If connecting via TCP, enter the IP and port instead
-        //host: '34.80.112.57',
+        host: '34.80.112.57',
         port: 3306,
 
         //...
