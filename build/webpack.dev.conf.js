@@ -10,9 +10,27 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin');
 const portfinder = require('portfinder');
+const mysql = require('mysql');
 
 const HOST = process.env.HOST;
 const PORT = process.env.PORT && Number(process.env.PORT);
+
+var pool;
+const createPool = async () => {
+    pool = await mysql.createPool({
+        user: 'root', // e.g. 'my-db-user'
+        password: 'fatsheepgod', // e.g. 'my-db-password'
+        database: 'chatroomTest', // e.g. 'my-database'
+        // If connecting via unix domain socket, specify the path
+        //socketPath: `/cloudsql/${process.env.CLOUD_SQL_CONNECTION_NAME}`,
+        // If connecting via TCP, enter the IP and port instead
+        host: '34.80.112.57',
+        port: 3306,
+
+        //...
+    });
+};
+createPool();
 
 const devWebpackConfig = merge(baseWebpackConfig, {
     module: {
@@ -100,6 +118,7 @@ Your application is running here:
 // express
 const app = require('express')();
 const fileUpload = require('express-fileupload');
+const bodyParser = require('body-parser')
 app.use(fileUpload()); // for parsing multipart/form-data
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -151,6 +170,48 @@ app.get('/getIMServerList', function (req, res) {
         data: Array.from(serverChatDic.values()).map((item) => {
             return item.serverChatEn;
         }) // 只需要serverChatDic.values内的serverChatEn
+    });
+});
+app.post('/api/msgList_read', (req, res) => {
+    var msgs = [];
+    pool.getConnection(function (err, connection) {
+        connection.query('SELECT msg_content FROM historyMsg where server_id = ? AND client_id = ? ORDER BY date',
+            [req.body.serverChatId, req.body.clientChatId],
+            function (err, rows) {
+                for (var row of rows) {
+                    msgs.push(JSON.parse(row.msg_content))
+                }
+                console.log("query success and release");
+                // console.log(req.body.serverChatId,req.body.clientChatId)
+                // console.log(msgs)
+                res.send({
+                    msgList: msgs
+                })
+            });
+        connection.release();
+    });
+});
+app.post('/api/ChatEn_update', (req, res) => {
+    pool.getConnection(function (err, connection) {
+        connection.query('UPDATE ChatEn SET ChatEnList=?, done_ChatEnList=? WHERE server_id=?',
+            [JSON.stringify(req.body.ChatEnList), JSON.stringify(req.body.done_ChatEnList), req.body.serverChatId],
+            function (err, rows) {
+                console.log("ChatEn_update query success and release");
+                res.send(req.body)
+            });
+        connection.release();
+    });
+});
+app.post('/api/ChatEn_read', (req, res) => {
+    pool.getConnection(function (err, connection) {
+        connection.query('SELECT ChatEnList, done_ChatEnList FROM ChatEn where server_id = ?',
+            [req.body.serverChatId],
+            function (err, rows) {
+                console.log("ChatEn_read query success and release");
+                //console.log(JSON.parse(rows[0].ChatEnList))
+                res.send(rows[0])
+            });
+        connection.release();
     });
 });
 app.listen(3000);
@@ -215,6 +276,16 @@ io.on('connection', function (socket) {
         }
     });
 
+    // 41add
+    pool.getConnection(function (err, connection) {
+        connection.query('INSERT INTO historyMsg (msg_content, server_id, client_id, date, server_on) VALUES (?, ?, ?, NOW(), ?)',
+            [JSON.stringify(data.msg), data.serverChatId, data.clientChatId, 1],
+            function (err, rows) {
+                console.log("query success and release");
+            });
+        connection.release();
+    });
+
     socket.on('disconnect', function () {
         // console.log('disconnect:socket id =' + socket.id);
         clientChatDic.forEach(mapcallback);
@@ -226,11 +297,13 @@ io.on('connection', function (socket) {
             if (value.socket.id == socket.id) {  // 找到對應socketid
                 clientChatDic.delete(key); // key = clientid
                 //對 server 端的socket傳送 client off
-                serverChatDic.get('ieat').socket.forEach((socketUnit) => {
-                    socketUnit.emit('CLIENT_OFF', {
-                        clientChatEn: value.clientChatEn
-                    });
-                })
+                if (serverChatDic.has('ieat')) {
+                    serverChatDic.get('ieat').socket.forEach((socketUnit) => {
+                        socketUnit.emit('CLIENT_OFF', {
+                            clientChatEn: value.clientChatEn
+                        });
+                    })
+                }
             }
         }
     });
@@ -239,6 +312,9 @@ io.on('connection', function (socket) {
         socket.on(eventName, (data) => {
             let clientChatEn = data.clientChatEn;
             let serverChatId = data.serverChatId;
+            let clientChatId = clientChatEn.clientChatId;
+            let server_on = 1;
+
             console.log('server get')
             // 1.通知服务端
             if (serverChatDic.has(serverChatId)) {
@@ -269,20 +345,43 @@ io.on('connection', function (socket) {
                     clientChatEn: clientChatEn,
                     socket: socket
                 });
+                // 在客戶連線時載入 歷史訊息
+                //41add
+                pool.getConnection(function (err, connection) {
+                    connection.query('SELECT msg_content FROM historyMsg where server_id = ? AND client_id = ? ORDER BY date',
+                        [serverChatId, clientChatId],
+                        function (err, rows) {
+                            let msgs = [];
+                            for (var row of rows) {
+                                msgs.push(JSON.parse(row.msg_content))
+                            }
+                            socket.emit('HISTORY_MSG', {
+                                msgList: msgs
+                            });
+                        });
+                    connection.release();
+                });
+
                 console.log('client_on & clientchatDic =' + clientChatDic)
                 serverChatDic.has(serverChatId) &&
                     socket.emit('SERVER_CONNECTED', {
                         serverChatEn: serverChatDic.get(serverChatId).serverChatEn
                     });
-                // 在客戶連線時載入 歷史訊息
-                // serverChatDic.has(serverChatId) &&
-                //     socket.emit('SERVER_HISTORY_MSG', {
-                //         // msgList: 從 資料庫拿取 歷史對話
-                //     });
 
             } else if (eventName === 'CLIENT_OFF') {
                 // 2)'CLIENT_OFF'，删除连接
                 clientChatDic.delete(clientChatEn.clientChatId);
+            } else if (eventName === 'CLIENT_SEND_MSG') {
+                // 41add
+                pool.getConnection(function (err, connection) {
+                    connection.query('INSERT INTO historyMsg (msg_content, server_id, client_id, date, server_on) VALUES (?, ?, ?, NOW(), ?)',
+                        [JSON.stringify(data.msg), serverChatId, clientChatId, server_on],
+                        function (err, rows) {
+                            console.log("query success and release");
+                        });
+                    connection.release();
+                });
+
             }
         });
     });
