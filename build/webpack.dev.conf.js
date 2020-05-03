@@ -274,17 +274,17 @@ io.on('connection', function (socket) {
                 }
             })
         }
+        // 41add
+        pool.getConnection(function (err, connection) {
+            connection.query('INSERT INTO historyMsg (msg_content, server_id, client_id, date, server_on) VALUES (?, ?, ?, NOW(), ?)',
+                [JSON.stringify(data.msg), data.serverChatId, data.clientChatId, 1],
+                function (err, rows) {
+                    console.log("query success and release");
+                });
+            connection.release();
+        });
     });
 
-    // 41add
-    pool.getConnection(function (err, connection) {
-        connection.query('INSERT INTO historyMsg (msg_content, server_id, client_id, date, server_on) VALUES (?, ?, ?, NOW(), ?)',
-            [JSON.stringify(data.msg), data.serverChatId, data.clientChatId, 1],
-            function (err, rows) {
-                console.log("query success and release");
-            });
-        connection.release();
-    });
 
     socket.on('disconnect', function () {
         // console.log('disconnect:socket id =' + socket.id);
