@@ -348,6 +348,9 @@ io.on('connection', function (socket) {
                 // 在客戶連線時載入 歷史訊息
                 //41add
                 pool.getConnection(function (err, connection) {
+                    if(err){
+                        console.log(err);
+                    }
                     connection.query('SELECT msg_content FROM historyMsg where server_id = ? AND client_id = ? ORDER BY date',
                         [serverChatId, clientChatId],
                         function (err, rows) {
