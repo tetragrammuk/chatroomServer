@@ -225,7 +225,7 @@ const credentials = {
     passphrase: process.env.PASSPHRASE
 }
 
-var server = require('https').createServer(credentials);
+var server = require('https').createServer(credentials, app);
 // var server = require('https').createServer();
 var io = require('socket.io')(server);
 var serverChatDic = new Map(); // 服务端
