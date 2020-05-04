@@ -194,6 +194,7 @@ app.post('/api/msgList_read', (req, res) => {
 });
 app.post('/api/ChatEn_update', (req, res) => {
     console.log("ChatEn_update API START");
+    console.log(req.body);
 
     pool.getConnection(function (err, connection) {
         connection.query('UPDATE ChatEn SET ChatEnList=?, done_ChatEnList=? WHERE server_id=?',
