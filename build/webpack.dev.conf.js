@@ -205,6 +205,8 @@ app.post('/api/ChatEn_update', (req, res) => {
     });
 });
 app.post('/api/ChatEn_read', (req, res) => {
+    console.log("ChatEn_read API START");
+
     pool.getConnection(function (err, connection) {
         connection.query('SELECT ChatEnList, done_ChatEnList FROM ChatEn where server_id = ?',
             [req.body.serverChatId],
