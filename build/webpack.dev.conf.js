@@ -192,6 +192,8 @@ app.post('/api/msgList_read', (req, res) => {
     });
 });
 app.post('/api/ChatEn_update', (req, res) => {
+    console.log("ChatEn_update API START");
+
     pool.getConnection(function (err, connection) {
         connection.query('UPDATE ChatEn SET ChatEnList=?, done_ChatEnList=? WHERE server_id=?',
             [JSON.stringify(req.body.ChatEnList), JSON.stringify(req.body.done_ChatEnList), req.body.serverChatId],
@@ -214,7 +216,7 @@ app.post('/api/ChatEn_read', (req, res) => {
         connection.release();
     });
 });
-app.listen(3000);
+//app.listen(3000);
 
 // socket
 const privateKey = fs.readFileSync('/home/bob41777/tempp/sslforfree/private.key', 'utf8')
@@ -225,7 +227,7 @@ const credentials = {
     passphrase: process.env.PASSPHRASE
 }
 
-var server = require('https').createServer(credentials, app);
+var server = require('https').createServer(credentials, app).listen(3000);
 // var server = require('https').createServer();
 var io = require('socket.io')(server);
 var serverChatDic = new Map(); // 服务端
