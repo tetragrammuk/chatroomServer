@@ -173,6 +173,7 @@ app.get('/getIMServerList', function (req, res) {
     });
 });
 app.post('/api/msgList_read', (req, res) => {
+    console.log("msgList_read API START");
     var msgs = [];
     pool.getConnection(function (err, connection) {
         connection.query('SELECT msg_content FROM historyMsg where server_id = ? AND client_id = ? ORDER BY date',
