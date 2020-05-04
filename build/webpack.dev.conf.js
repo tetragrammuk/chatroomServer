@@ -131,6 +131,12 @@ app.use(function (req, res, next) {
         next();
     }
 });
+app.use(
+    bodyParser.urlencoded({
+        extended: true
+    })
+)
+app.use(bodyParser.json())
 // 上传文件
 app.post('/upload', function (req, res) {
     if (!req.files) {
@@ -182,7 +188,7 @@ app.post('/api/msgList_read', (req, res) => {
                 for (var row of rows) {
                     msgs.push(JSON.parse(row.msg_content))
                 }
-                console.log("query success and release");
+                console.log("msgList_read query success and release");
                 // console.log(req.body.serverChatId,req.body.clientChatId)
                 // console.log(msgs)
                 res.send({
@@ -285,7 +291,7 @@ io.on('connection', function (socket) {
             connection.query('INSERT INTO historyMsg (msg_content, server_id, client_id, date, server_on) VALUES (?, ?, ?, NOW(), ?)',
                 [JSON.stringify(data.msg), data.serverChatId, data.clientChatId, 1],
                 function (err, rows) {
-                    console.log("query success and release");
+                    console.log("INSERT historyMsg query success and release");
                 });
             connection.release();
         });
@@ -384,7 +390,7 @@ io.on('connection', function (socket) {
                     connection.query('INSERT INTO historyMsg (msg_content, server_id, client_id, date, server_on) VALUES (?, ?, ?, NOW(), ?)',
                         [JSON.stringify(data.msg), serverChatId, clientChatId, server_on],
                         function (err, rows) {
-                            console.log("query success and release");
+                            console.log("INSERT historyMsg query success and release");
                         });
                     connection.release();
                 });
