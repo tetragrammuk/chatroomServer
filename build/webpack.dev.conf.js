@@ -299,7 +299,7 @@ io.on('connection', function (socket) {
 
 
     socket.on('disconnect', function () {
-        // console.log('disconnect:socket id =' + socket.id);
+        console.log('disconnect:socket id =' + socket.id);
         clientChatDic.forEach(mapcallback);
         function mapcallback(value, key, map) {
             // console.log("this is vaule.id=" + value.socket.id);
@@ -309,8 +309,8 @@ io.on('connection', function (socket) {
             if (value.socket.id == socket.id) {  // 找到對應socketid
                 clientChatDic.delete(key); // key = clientid
                 //對 server 端的socket傳送 client off
-                if (serverChatDic.has('ieat')) {
-                    serverChatDic.get('ieat').socket.forEach((socketUnit) => {
+                if (serverChatDic.has('Mr.Demo')) {
+                    serverChatDic.get('Mr.Demo').socket.forEach((socketUnit) => {
                         socketUnit.emit('CLIENT_OFF', {
                             clientChatEn: value.clientChatEn
                         });
